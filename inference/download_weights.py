@@ -3,7 +3,7 @@
 
 Files in the HF repo (two experts of the Wan2.2 MoE):
 
-    HadiZayer/MaskedWorld/
+    HadiZayer/masked-visual-actions/
       masked_world_lora_high.safetensors   # high-noise expert
       masked_world_lora_low.safetensors    # low-noise expert
 
@@ -22,7 +22,7 @@ import os
 
 from huggingface_hub import hf_hub_download
 
-DEFAULT_REPO_ID = "HadiZayer/MaskedWorld"
+DEFAULT_REPO_ID = "HadiZayer/masked-visual-actions"
 
 FILES = ["masked_world_lora_high.safetensors", "masked_world_lora_low.safetensors"]
 

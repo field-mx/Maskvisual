@@ -1,4 +1,4 @@
-# MaskedWorld
+# masked-visual-actions
 
 Code for finetuning and running our robot-video **control model**: a LoRA on top
 of [`PAI/Wan2.2-Fun-A14B-Control`](https://modelscope.cn/models/PAI/Wan2.2-Fun-A14B-Control).
@@ -16,7 +16,7 @@ training/    train_control.sh                — finetune a control LoRA on your
 ```
 
 Weights are on the Hugging Face Hub at
-[`HadiZayer/MaskedWorld`](https://huggingface.co/HadiZayer/MaskedWorld).
+[`HadiZayer/masked-visual-actions`](https://huggingface.co/HadiZayer/masked-visual-actions).
 
 ## Setup
 
@@ -60,7 +60,7 @@ the two-expert recipe (stock DiffSynth params, run from the DiffSynth-Studio roo
 ```bash
 cd DiffSynth-Studio
 DATASET_CSV=/path/to/train.csv OUTPUT_DIR=/path/to/out \
-    bash /path/to/MaskedWorld/training/train_control.sh
+    bash /path/to/masked-visual-actions/training/train_control.sh
 ```
 
 This writes `<OUTPUT_DIR>_high_noise/` and `<OUTPUT_DIR>_low_noise/`; point
