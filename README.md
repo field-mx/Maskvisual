@@ -63,6 +63,20 @@ CUDA_VISIBLE_DEVICES=0 python inference/infer.py \
   </tr>
 </table>
 
+值得注意的是，该视频模型在复杂场景/复杂运动情况/高速运动情况的世界模型式推理仍存在逻辑不足和幻觉情况：
+示例：灵巧手转方块
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="./assets/2round_denoisy.gif" width="500">
+    </td>
+    <td align="center">
+      <img src="./assets/5rounds_denoisy.gif" width="400">
+    </td>
+  </tr>
+</table>
+
 # masked-visual-actions
 
 Code for finetuning and running our robot-video **control model**: a LoRA on top
