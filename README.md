@@ -11,6 +11,17 @@ sample_inputs/orca_control/
 ```
 
 当前默认输入为：
+<table>
+  <tr>
+    <td align="center">
+      <img src="./assets/action.gif" width="400">
+    </td>
+    <td align="center">
+      <img src="./assets/initial_actor_first_frame.png" width="400">
+    </td>
+  </tr>
+</table>
+
 
 ```text
 initial_actor_ur5e_mask.mp4    # 动态机械臂控制视频，UR5e+夹爪 mask，MP4 格式
