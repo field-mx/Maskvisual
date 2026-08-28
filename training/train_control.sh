@@ -25,6 +25,7 @@ OUTPUT_DIR=${OUTPUT_DIR:-./checkpoints/control}
 DIFFSYNTH_DIR=${DIFFSYNTH_DIR:-.}
 TRAIN_PY="${DIFFSYNTH_DIR}/examples/wanvideo/model_training/train.py"
 NUM_GPUS=${NUM_GPUS:-4}
+MIXED_PRECISION=${MIXED_PRECISION:-fp16}
 BASE=PAI/Wan2.2-Fun-A14B-Control
 # Which expert(s) to train: high, low, or both.
 EXPERT=${EXPERT:-both}
@@ -33,7 +34,7 @@ train_expert () {
   local noise=$1 max_b min_b
   if [ "$noise" = "high" ]; then max_b=0.358; min_b=0; else max_b=1; min_b=0.358; fi
   echo "=== training ${noise}-noise expert (timestep boundary ${min_b}-${max_b}) ==="
-  accelerate launch --mixed_precision=bf16 --num_processes=${NUM_GPUS} --multi_gpu "${TRAIN_PY}" \
+  accelerate launch --mixed_precision=${MIXED_PRECISION} --num_processes=${NUM_GPUS} --multi_gpu "${TRAIN_PY}" \
     --dataset_base_path "" \
     --dataset_metadata_path "${DATASET_CSV}" \
     --data_file_keys "video,control_video,reference_image" \

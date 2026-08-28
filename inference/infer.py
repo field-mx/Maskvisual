@@ -42,20 +42,36 @@ DEFAULT_NEGATIVE_PROMPT = (
 BASE_MODEL_ID = "PAI/Wan2.2-Fun-A14B-Control"
 
 
-def build_pipeline(base_model_id, low_vram=False):
+def resolve_dtype(dtype_name):
+    """Pick a compute dtype supported efficiently by the active CUDA GPU."""
+    native_bf16 = torch.cuda.get_device_capability()[0] >= 8
+    if dtype_name == "float16":
+        return torch.float16
+    if dtype_name == "bfloat16":
+        if not native_bf16:
+            raise RuntimeError(
+                "This GPU does not support bfloat16 efficiently; use --dtype float16."
+            )
+        return torch.bfloat16
+    return torch.bfloat16 if native_bf16 else torch.float16
+
+
+def build_pipeline(base_model_id, low_vram=False, dtype=torch.bfloat16):
     """Load the Wan2.2-Fun-A14B-Control pipeline (both experts + T5 + VAE)."""
     kwargs = {}
     if low_vram:
         # Offload weights to disk; keeps peak VRAM low at the cost of speed.
         kwargs = dict(
             offload_dtype="disk", offload_device="disk",
-            onload_dtype=torch.bfloat16, onload_device="cpu",
-            preparing_dtype=torch.bfloat16, preparing_device="cuda",
-            computation_dtype=torch.bfloat16, computation_device="cuda",
+            onload_dtype=dtype, onload_device="cpu",
+            preparing_dtype=dtype, preparing_device="cuda",
+            computation_dtype=dtype, computation_device="cuda",
         )
     pipe = WanVideoPipeline.from_pretrained(
-        torch_dtype=torch.bfloat16,
+        torch_dtype=dtype,
         device="cuda",
+        # Reuse the downloaded original T5/VAE instead of downloading converted copies.
+        redirect_common_files=False,
         model_configs=[
             ModelConfig(model_id=base_model_id, origin_file_pattern="high_noise_model/diffusion_pytorch_model*.safetensors", **kwargs),
             ModelConfig(model_id=base_model_id, origin_file_pattern="low_noise_model/diffusion_pytorch_model*.safetensors", **kwargs),
@@ -79,24 +95,34 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--lora-high", required=True, help="High-noise expert LoRA (.safetensors)")
     ap.add_argument("--lora-low", required=True, help="Low-noise expert LoRA (.safetensors)")
-    ap.add_argument("--control-video", required=True, help="Control video (e.g. URDF robot render)")
-    ap.add_argument("--reference-image", default=None, help="First-frame reference image; defaults to control video frame 0")
+    # 输入视频
+    ap.add_argument("--control-video", default="/home/muxiang/work-maskvisual/sample_inputs/orca_control/initial_actor_ur5e_mask.mp4", help="Control video (e.g. URDF robot render)")
+    # 输入图片
+    ap.add_argument("--reference-image", default="/home/muxiang/work-maskvisual/sample_inputs/orca_control/initial_actor_first_frame.png", help="First-frame reference image; defaults to the bundled ORCA reference image")
     ap.add_argument("--prompt", required=True, help="Text prompt / task description")
     ap.add_argument("--negative-prompt", default=DEFAULT_NEGATIVE_PROMPT)
     ap.add_argument("--output", required=True, help="Output .mp4 path")
     ap.add_argument("--base-model-id", default=BASE_MODEL_ID)
-    ap.add_argument("--height", type=int, default=480)
-    ap.add_argument("--width", type=int, default=832)
+    ap.add_argument("--height", type=int, default=240)
+    ap.add_argument("--width", type=int, default=240)
     ap.add_argument("--num-frames", type=int, default=81)
     ap.add_argument("--num-inference-steps", type=int, default=50)
     ap.add_argument("--seed", type=int, default=123)
     ap.add_argument("--fps", type=int, default=15)
     ap.add_argument("--lora-alpha", type=float, default=1.0)
+    ap.add_argument(
+        "--dtype",
+        choices=("auto", "float16", "bfloat16"),
+        default="auto",
+        help="Compute dtype; auto uses FP16 on pre-Ampere GPUs and BF16 otherwise",
+    )
     ap.add_argument("--low-vram", action="store_true", help="Offload weights to disk to reduce peak VRAM")
     ap.add_argument("--save-inputs", action="store_true", help="Also save control/reference alongside the output")
     args = ap.parse_args()
 
-    pipe = build_pipeline(args.base_model_id, low_vram=args.low_vram)
+    dtype = resolve_dtype(args.dtype)
+    print(f"Using compute dtype: {dtype}")
+    pipe = build_pipeline(args.base_model_id, low_vram=args.low_vram, dtype=dtype)
     pipe.load_lora(pipe.dit, args.lora_high, alpha=args.lora_alpha)
     pipe.load_lora(pipe.dit2, args.lora_low, alpha=args.lora_alpha)
 
@@ -116,6 +142,7 @@ def main():
         reference_image=reference_image,
         height=args.height,
         width=args.width,
+        num_frames=args.num_frames,
         num_inference_steps=args.num_inference_steps,
         seed=args.seed,
         tiled=True,

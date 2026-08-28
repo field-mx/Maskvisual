@@ -1,11 +1,16 @@
 # Python
+.venv/
+.cache/
 __pycache__/
 *.py[cod]
 *.egg-info/
 .ipynb_checkpoints/
 
 # Downloaded weights / model outputs
+DiffSynth-Studio/
+models/
 checkpoints/
+sample_inputs/
 *.safetensors
 *.ckpt
 *.pth
