@@ -19,3 +19,9 @@ sample_inputs/
 # OS / editor
 .DS_Store
 *.swp
+
+# Keep project input/output assets under version control.
+!sample_inputs/
+!sample_inputs/**
+!outputs/
+!outputs/**
