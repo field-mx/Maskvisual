@@ -50,6 +50,19 @@ CUDA_VISIBLE_DEVICES=0 python inference/infer.py \
 
 `--control-video` 和 `--reference-image` 已在脚本中设置为上述默认路径，因此可以省略。测试流程可将 `--num-inference-steps` 改为 `2`，正式生成建议使用 `50`。输出文件位于 `outputs/robot_result.mp4`。
 
+视频产出结果如下：分别是低分辨率两轮去噪以及原生分辨率50轮去噪（50轮去噪为模型默认参数）
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="./assets/2round_denoisy.gif" width="500">
+    </td>
+    <td align="center">
+      <img src="./assets/5rounds_denoisy.gif" width="400">
+    </td>
+  </tr>
+</table>
+
 # masked-visual-actions
 
 Code for finetuning and running our robot-video **control model**: a LoRA on top
