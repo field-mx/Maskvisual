@@ -20,6 +20,7 @@ Example
         --prompt "a robot arm picks up a mug" \
         --output out.mp4
 """
+# 视频生成脚本，输入的动态视频和画面位于：sample_inputs/orca_control
 import argparse
 import os
 

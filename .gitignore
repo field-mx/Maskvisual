@@ -15,10 +15,6 @@ sample_inputs/
 *.ckpt
 *.pth
 
-# Generated media
-*.mp4
-*.png
-*.jpg
 
 # OS / editor
 .DS_Store
