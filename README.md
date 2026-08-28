@@ -69,10 +69,7 @@ CUDA_VISIBLE_DEVICES=0 python inference/infer.py \
 <table>
   <tr>
     <td align="center">
-      <img src="./assets/2round_denoisy.gif" width="500">
-    </td>
-    <td align="center">
-      <img src="./assets/5rounds_denoisy.gif" width="400">
+      <img src="./assets/hands.gif" width="500">
     </td>
   </tr>
 </table>
