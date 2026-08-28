@@ -1,3 +1,44 @@
+# 本实验复现与使用说明
+
+本项目用于复现 `masked-visual-actions` 机器人视频生成实验。当前复现流程使用 Wan2.2-Fun-A14B-Control 基础模型、项目提供的两份 LoRA 权重，以及 LeWm/OgBench 生成的机械臂控制轨迹。
+
+## 视频生成脚本
+
+视频生成入口是 `inference/infer.py`。模型的输入文件位于：
+
+```text
+sample_inputs/orca_control/
+```
+
+当前默认输入为：
+
+```text
+initial_actor_ur5e_mask.mp4    # 动态机械臂控制视频，UR5e+夹爪 mask，MP4 格式
+initial_actor_first_frame.png  # 与控制视频对应的首帧参考图像，PNG 格式
+```
+
+控制视频表示机械臂运动过程，参考图像提供场景和物体外观；二者应具有相同的画面比例。任务指令通过 `--prompt` 输入。LoRA 权重位于 `checkpoints/`，生成结果默认保存到 `outputs/`，格式为 MP4 视频。
+
+在服务器上运行：
+
+```bash
+cd /home/muxiang/work-maskvisual
+source .venv/bin/activate
+export DIFFSYNTH_MODEL_BASE_PATH=/home/muxiang/work-maskvisual/models
+
+CUDA_VISIBLE_DEVICES=0 python inference/infer.py \
+    --lora-high checkpoints/masked_world_lora_high.safetensors \
+    --lora-low checkpoints/masked_world_lora_low.safetensors \
+    --prompt "a robot arm manipulates a cube" \
+    --output outputs/robot_result.mp4 \
+    --height 480 --width 480 \
+    --num-frames 81 \
+    --num-inference-steps 50 \
+    --dtype auto --low-vram
+```
+
+`--control-video` 和 `--reference-image` 已在脚本中设置为上述默认路径，因此可以省略。测试流程可将 `--num-inference-steps` 改为 `2`，正式生成建议使用 `50`。输出文件位于 `outputs/robot_result.mp4`。
+
 # masked-visual-actions
 
 Code for finetuning and running our robot-video **control model**: a LoRA on top
